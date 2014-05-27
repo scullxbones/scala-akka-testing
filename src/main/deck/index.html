@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">	
+<head>
+	<meta charset="utf-8">
+	<title>Scala and Akka Testing Techniques</title>
+	<link rel="stylesheet" href="css/reveal.min.css">
+	<link rel="stylesheet" href="css/theme/default.css" id="theme">	
+	<!--Add support for earlier versions of Internet Explorer -->
+	<!--[if lt IE 9]>
+	<script src="lib/js/html5shiv.js"></script>
+	<![endif]-->
+</head>
+
+<body>
+	<div class="reveal">
+		<div class="slides">
+			<section data-markdown="slides/title.md" 
+					 data-separator="^\n\n\n"  
+			         data-vertical="^\n\n"  
+			         data-notes="^Note:"  
+			         data-charset="utf-8"></section>
+
+			<section data-markdown="slides/overview.md" 
+					 data-separator="^\n\n\n"  
+			         data-vertical="^\n\n"  
+			         data-notes="^Note:"  
+			         data-charset="utf-8"></section>
+
+			<section id="flavors">
+
+			<section data-markdown="slides/scalatest.md" 
+					 data-separator="^\n\n\n"  
+			         data-vertical="^\n\n"  
+			         data-notes="^Note:"  
+			         data-charset="utf-8"></section>
+
+			<section data-markdown="slides/scalatest-sample.md" 
+					 data-separator="^\n\n\n"  
+			         data-vertical="^\n\n"  
+			         data-notes="^Note:"  
+			         data-charset="utf-8"></section>
+
+			<section data-markdown="slides/specs2.md" 
+					 data-separator="^\n\n\n"  
+			         data-vertical="^\n\n"  
+			         data-notes="^Note:"  
+			         data-charset="utf-8"></section>
+
+			<section data-markdown="slides/specs2-sample.md" 
+					 data-separator="^\n\n\n"  
+			         data-vertical="^\n\n"  
+			         data-notes="^Note:"  
+			         data-charset="utf-8"></section>
+
+			<section data-markdown="slides/scalacheck.md" 
+					 data-separator="^\n\n\n"  
+			         data-vertical="^\n\n"  
+			         data-notes="^Note:"  
+			         data-charset="utf-8"></section>
+
+			</section>
+
+		</div>
+	</div>
+	<script src="lib/js/head.min.js"></script>
+	<script src="js/reveal.min.js"></script>
+
+	<script type="text/javascript">
+		Reveal.initialize({
+			//width: "100%",
+			//height: "100%",
+			//padding: "15px",
+			controls: true,
+			slideNumber: true,
+			history: true,
+			mouseWheel: true,
+
+		    // parallaxBackgroundImage: "background.jpg", // "https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg",
+		    // parallaxBackgroundSize: "1600px 1200px", // "2100px 900px",
+		    // transition: "linear",
+
+			dependencies: [
+				// Cross-browser shim that fully implements classList - https://github.com/eligrey/classList.js/
+				{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+
+				// Interpret Markdown in <section> elements
+				{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+				{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+
+				// Syntax highlight for <code> elements
+				{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+
+				// Zoom in and out with Alt+click
+				{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } }
+			]
+		});
+	</script>
+</body>
+</html>
