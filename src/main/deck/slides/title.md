@@ -1,5 +1,5 @@
 # Scala and Akka Testing Techniques
 
-### Lessons Learned
+### Tips & Tricks
 
-##### Brian Scully
+###### Brian Scully

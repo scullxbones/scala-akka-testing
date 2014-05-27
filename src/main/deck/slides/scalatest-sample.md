@@ -1,39 +1,24 @@
+## Scalatest
+
 ```scala
-class EnterpriseDirectoryActionFlatSpec extends FlatSpec with ShouldMatchers with MockitoSugar {
-  trait Fixture {
-    val fields = Seq("one", "two", "three")
-
-    // some mock objects
-    val directoryManager = mock[EnterpriseDirectoryManager]
-    when(directoryManager.isLicenseValid).thenReturn(true)
-    when(directoryManager.getEnabledFields).thenReturn(fields.asJava)
-    when(directoryManager.shouldShowOrgChart("fred")).thenReturn(true)
-
-    val sessionAccessor = mock[SessionAccessor]
-    when(sessionAccessor.getSession).thenReturn(mock[HttpSession])
-
-    val action = new EnterpriseDirectoryAction(directoryManager, sessionAccessor)
+@RunWith(classOf[JUnitRunner])
+class FizzBuzzScalaTest extends FlatSpec with Matchers {
+  
+  "A FizzBuzz processor" should "return 'FizzBuzz' from a multiple of three and five" in { 
+      FizzBuzz(15) should be ("FizzBuzz") 
   }
-
-  "An enterprise directory action" should "provide enabled fields after a call to doDefault" in new Fixture {
-    action.doDefault()
-    action.getEnabledFields should be (f.fields)
+    
+  it should "return 'Fizz' from a multiple of three only" in { 
+      FizzBuzz(12) should be ("Fizz") 
   }
-
-  it should "provide enabled fields after a call to doSearchPrevious" in new Fixture {
-    action.doSearchPrevious()
-    action.getEnabledFields should be (f.fields)
+    
+  it should "return 'Buzz' from a multiple of five only" in { 
+      FizzBuzz(10) should be ("Buzz") 
   }
-
-  it should "provide enabled fields after a call to doSearchNext" in new Fixture {
-    action.doSearchNext()
-    action.getEnabledFields should be (f.fields)
+    
+  it should "return the stringified input from a non multiple of three or five" in { 
+      FizzBuzz(11) should be ("11") 
   }
-
-  it should "provide enabled fields after a call to doExecuteSearch" in new Fixture {
-    action.setLastName("Bloggs")
-    action.doExecuteSearch()
-    action.getEnabledFields should be (f.fields)
-  }
+ 
 }
 ```

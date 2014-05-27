@@ -3,7 +3,11 @@ version := "0.1.0-SNAPSHOT"
 
 organization := "com.github.scullxbones"
 
-lazy val akkaVersion = "2.3.2"
+lazy val akkaVersion = "2.3.3"
+
+testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-u", "target/test-reports")
+
+testOptions in Test += Tests.Argument(TestFrameworks.Specs2,"junitxml","console","html")
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor" % akkaVersion, 
