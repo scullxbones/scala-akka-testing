@@ -16,7 +16,7 @@ module.exports = function(grunt) {
 		},
 
 		qunit: {
-			files: [ 'src/main/deck/test/*.html' ]
+			files: [ 'slides/test/*.html' ]
 		},
 
 		uglify: {
@@ -24,15 +24,15 @@ module.exports = function(grunt) {
 				banner: '<%= meta.banner %>\n'
 			},
 			build: {
-				src: 'src/main/deck/js/reveal.js',
-				dest: 'src/main/deck/js/reveal.min.js'
+				src: 'slides/js/reveal.js',
+				dest: 'slides/js/reveal.min.js'
 			}
 		},
 
 		cssmin: {
 			compress: {
 				files: {
-					'src/main/deck/css/reveal.min.css': [ 'src/main/deck/css/reveal.css' ]
+					'slides/css/reveal.min.css': [ 'slides/css/reveal.css' ]
 				}
 			}
 		},
@@ -40,15 +40,15 @@ module.exports = function(grunt) {
 		sass: {
 			main: {
 				files: {
-					'src/main/deck/css/theme/default.css': 'src/main/deck/css/theme/source/default.scss',
-					'src/main/deck/css/theme/beige.css': 'src/main/deck/css/theme/source/beige.scss',
-					'src/main/deck/css/theme/night.css': 'src/main/deck/css/theme/source/night.scss',
-					'src/main/deck/css/theme/serif.css': 'src/main/deck/css/theme/source/serif.scss',
-					'src/main/deck/css/theme/simple.css': 'src/main/deck/css/theme/source/simple.scss',
-					'src/main/deck/css/theme/sky.css': 'src/main/deck/css/theme/source/sky.scss',
-					'src/main/deck/css/theme/moon.css': 'src/main/deck/css/theme/source/moon.scss',
-					'src/main/deck/css/theme/solarized.css': 'src/main/deck/css/theme/source/solarized.scss',
-					'src/main/deck/css/theme/blood.css': 'src/main/deck/css/theme/source/blood.scss'
+					'slides/css/theme/default.css': 'slides/css/theme/source/default.scss',
+					'slides/css/theme/beige.css': 'slides/css/theme/source/beige.scss',
+					'slides/css/theme/night.css': 'slides/css/theme/source/night.scss',
+					'slides/css/theme/serif.css': 'slides/css/theme/source/serif.scss',
+					'slides/css/theme/simple.css': 'slides/css/theme/source/simple.scss',
+					'slides/css/theme/sky.css': 'slides/css/theme/source/sky.scss',
+					'slides/css/theme/moon.css': 'slides/css/theme/source/moon.scss',
+					'slides/css/theme/solarized.css': 'slides/css/theme/source/solarized.scss',
+					'slides/css/theme/blood.css': 'slides/css/theme/source/blood.scss'
 				}
 			}
 		},
@@ -73,29 +73,29 @@ module.exports = function(grunt) {
 					unescape: false
 				}
 			},
-			files: [ 'Gruntfile.js', 'src/main/deck/js/reveal.js' ]
+			files: [ 'Gruntfile.js', 'slides/js/reveal.js' ]
 		},
 
 		connect: {
 			server: {
 				options: {
 					port: port,
-					base: 'src/main/deck'
+					base: 'slides'
 				}
 			}
 		},
 
 		zip: {
 			deck: {
-				cwd: 'src/main/deck',
+				cwd: 'slides',
 				src: [
-				'src/main/deck/index.html',
-				'src/main/deck/css/**',
-				'src/main/deck/js/**',
-				'src/main/deck/lib/**',
-				'src/main/deck/images/**',
-				'src/main/deck/plugin/**',
-				'src/main/deck/slides/**'
+				'slides/index.html',
+				'slides/css/**',
+				'slides/js/**',
+				'slides/lib/**',
+				'slides/images/**',
+				'slides/plugin/**',
+				'slides/slides/**'
 				],
 				dest: 'target/scala-akka-testing-deck.zip'
 			} 
@@ -103,11 +103,11 @@ module.exports = function(grunt) {
 
 		watch: {
 			main: {
-				files: [ 'Gruntfile.js', 'src/main/deck/js/reveal.js', 'src/main/deck/css/reveal.css' ],
+				files: [ 'Gruntfile.js', 'slides/js/reveal.js', 'slides/css/reveal.css' ],
 				tasks: 'default'
 			},
 			theme: {
-				files: [ 'src/main/deck/css/theme/source/*.scss', 'src/main/deck/css/theme/template/*.scss' ],
+				files: [ 'slides/css/theme/source/*.scss', 'slides/css/theme/template/*.scss' ],
 				tasks: 'themes'
 			}
 		}

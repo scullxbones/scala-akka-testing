@@ -11,7 +11,8 @@ testOptions in Test += Tests.Argument(TestFrameworks.Specs2,"junitxml","console"
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor" % akkaVersion, 
-  "com.typesafe.akka" %% "akka-cluster" % akkaVersion, 
+  "com.typesafe.akka" %% "akka-cluster" % akkaVersion,
+  "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
   "com.typesafe.akka" %% "akka-testkit" % akkaVersion % "test",
   "com.typesafe.akka" %% "akka-multi-node-testkit" % akkaVersion % "test",
   "org.scalatest" %% "scalatest" % "2.1.7" % "test",
@@ -19,5 +20,6 @@ libraryDependencies ++= Seq(
   "junit" % "junit" % "4.11" % "test",
   "org.scalamock" %% "scalamock-scalatest-support" % "3.1.RC1" % "test",
   "org.mockito" % "mockito-all" % "1.9.5" % "test",
-  "org.scalacheck" %% "scalacheck" % "1.11.4" % "test"
+  "org.scalacheck" %% "scalacheck" % "1.11.4" % "test",
+  "ch.qos.logback" % "logback-classic" % "1.1.2" % "test"
 )

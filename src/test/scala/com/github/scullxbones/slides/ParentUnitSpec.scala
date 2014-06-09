@@ -3,12 +3,10 @@ package com.github.scullxbones.slides
 import scala.concurrent.duration._
 import akka.testkit.TestActorRef
 import akka.testkit.TestProbe
-import com.github.scullxbones.ChildActor
-import com.github.scullxbones.ParentActor
-import akka.actor.ActorRef
+import com.github.scullxbones.{ChildActor, ParentActor}
 import akka.actor.PoisonPill
 
-class ParentChildSpec extends BaseActorSpec {
+class ParentUnitSpec extends BaseActorSpec {
   
   import ParentActor._
   import ChildActor._
