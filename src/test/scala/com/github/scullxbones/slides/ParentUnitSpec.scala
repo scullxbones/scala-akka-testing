@@ -31,7 +31,7 @@ class ParentUnitSpec extends BaseActorSpec {
     childProbe.expectMsg(1.seconds,DoWork("id"))
     val exc = new RuntimeException
     childProbe.send(underTest,ChildFailure("id",exc))
-    expectMsg(Failure(exc))
+    expectMsg(Failure("id", exc))
   }
   
   it should "respond to success" in withParentChild { (underTest, childProbe) =>

@@ -37,7 +37,8 @@ class MultiNodeSlidesSpecMultiJvmNode3 extends MultiNodeSlidesSpec
 
 abstract class MultiNodeSlidesSpec
   extends MultiNodeSpec(MultiNodeConfiguration)
-  with STMultiNodeSpec {
+  with STMultiNodeSpec 
+  with ImplicitSender {
 
   import scala.concurrent.duration._
   import MultiNodeConfiguration._

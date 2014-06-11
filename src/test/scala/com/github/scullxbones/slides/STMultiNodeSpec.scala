@@ -10,8 +10,7 @@ trait STMultiNodeSpec
   with FlatSpecLike
   with Matchers
   with MockitoSugar
-  with BeforeAndAfterAll
-  with ImplicitSender {
+  with BeforeAndAfterAll {
 
   override def beforeAll() = multiNodeSpecBeforeAll()
 

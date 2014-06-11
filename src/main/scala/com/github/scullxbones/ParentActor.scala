@@ -6,9 +6,10 @@ import akka.event.LoggingReceive
 
 object ParentActor {
   sealed trait Protocol
+  case class Ack(id: String) extends Protocol
   case class Work(id: String) extends Protocol
   case class Success(id: String) extends Protocol
-  case class Failure(exception: Throwable) extends Protocol
+  case class Failure(id: String, exception: Throwable) extends Protocol
   case object TryAgainLater extends Protocol
 }
 
@@ -31,7 +32,9 @@ class ParentActor(childFactory: ActorRefFactory => ActorRef, maxRetries: Int = 3
   }
   
   def running(awaitingResponse: Map[String,WorkTransaction]): Receive = LoggingReceive {
-    case Work(id) => handleWork(id, awaitingResponse)
+    case Work(id) => 
+      handleWork(id, awaitingResponse)
+      sender() ! Ack(id)
     case ChildFailure(id,exc) => awaitingResponse get id map (handleChildFailure(id,_,exc,awaitingResponse))
     case ChildSuccess(id) => awaitingResponse get id map (handleChildSuccess(id,_,awaitingResponse))
     case WorkTimeout(id) => awaitingResponse get id map (handleWorkTimeout(id,_,awaitingResponse))
@@ -45,7 +48,7 @@ class ParentActor(childFactory: ActorRefFactory => ActorRef, maxRetries: Int = 3
   }
 
   def handleChildFailure(id: String, wt: WorkTransaction, exc: Throwable, awaitingResponse: Map[String,WorkTransaction]) {
-    wt.replyTo ! Failure(exc)
+    wt.replyTo ! Failure(id, exc)
     context.become(running(awaitingResponse - id))
   }
 

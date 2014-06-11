@@ -29,6 +29,9 @@ val project = Project(
       "org.scalacheck" %% "scalacheck" % "1.11.4" % "test",
       "ch.qos.logback" % "logback-classic" % "1.1.2" % "test"
     ),
+    unmanagedSourceDirectories in Compile <<= (scalaSource in Compile)(Seq(_)),
+    unmanagedSourceDirectories in Test <<= (scalaSource in Test)(Seq(_)),
+    unmanagedSourceDirectories in MultiJvm <<= (scalaSource in MultiJvm)(Seq(_)),
     compile in MultiJvm <<= (compile in MultiJvm) triggeredBy (compile in Test),
     parallelExecution in Test := false,
     executeTests in Test <<= (executeTests in Test, executeTests in MultiJvm) map {
