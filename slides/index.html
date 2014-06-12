@@ -4,7 +4,7 @@
 	<meta charset="utf-8">
 	<title>Scala and Akka Testing Techniques</title>
 	<link rel="stylesheet" href="css/reveal.min.css">
-	<link rel="stylesheet" href="css/theme/blood.css" id="theme">
+	<link rel="stylesheet" href="css/theme/night.css" id="theme">
 	<link rel="stylesheet" href="lib/css/github.css">
 	<link rel="stylesheet" href="css/overrides.css">
 	<!--Add support for earlier versions of Internet Explorer -->
@@ -16,17 +16,30 @@
 <body>
 	<div class="reveal">
 		<div class="slides">
-			<section data-markdown="slides/title.md" 
-					 data-separator="^\n\n\n"  
-			         data-vertical="^\n\n"  
-			         data-notes="^Note:"  
-			         data-charset="utf-8"></section>
+			<section data-markdown>
+				<script type="text/template">
+# Scala and Akka Testing Techniques
 
-			<section data-markdown="slides/overview.md" 
-					 data-separator="^\n\n\n"  
-			         data-vertical="^\n\n"  
-			         data-notes="^Note:"  
-			         data-charset="utf-8"></section>
+### Tips &amp; Tricks
+
+###### Brian Scully
+				</script>
+			</section>
+
+			<section data-markdown=>
+				<script type="text/template">
+## Overview
+
+- Flavors: Scalatest, Specs2, Scalacheck
+- Scalatest: more detail
+- Mockito, Traits for mocking, stubbing, spies
+- Akka testkit
+- TestActorRef, TestProbe &amp; single-threaded testing
+- actorOf, TestProbe &amp; multi-threaded testing
+- Multi-JVM testing
+- Case Study: Work distribution
+				</script>
+			</section>
 
 			<section id="flavors">
 
@@ -34,41 +47,121 @@
 					<h2>Testing flavors</h2>
 				</section>
 
-				<section data-markdown="slides/scalatest.md" 
-						 data-separator="^\n\n\n"  
-				         data-vertical="^\n\n"  
-				         data-notes="^Note:"  
-				         data-charset="utf-8"></section>
+				<section data-markdown>
+					<script type="text/template">
+## Scalatest
 
-				<section data-markdown="slides/scalatest-sample.md" 
-						 data-separator="^\n\n\n"  
-				         data-vertical="^\n\n"  
-				         data-notes="^Note:"  
-				         data-charset="utf-8"></section>
+- Authored by: *Bill Venners*
+- Very customizable via mixed in traits
+- Supports a `Specs2-style` of testing with `WordSpec`
+- Supports property testing (`ScalaCheck` style) with `PropSpec`
+- Good integration in Eclipse / IDEA; JUnit / TestNG
+- Fairly easy transition from JUnit
+					</script>
+				</section>
 
-				<section data-markdown="slides/specs2.md" 
-						 data-separator="^\n\n\n"  
-				         data-vertical="^\n\n"  
-				         data-notes="^Note:"  
-				         data-charset="utf-8"></section>
+				<section data-markdown>
+					<script type="text/template">
+## Scalatest
 
-				<section data-markdown="slides/specs2-sample.md" 
-						 data-separator="^\n\n\n"  
-				         data-vertical="^\n\n"  
-				         data-notes="^Note:"  
-				         data-charset="utf-8"></section>
+```scala
+@RunWith(classOf[JUnitRunner])
+class FizzBuzzScalaTest extends FlatSpec with Matchers {
+  
+  "A FizzBuzz processor" should "return 'FizzBuzz' from a multiple of three and five" in { 
+      FizzBuzz(15) should be ("FizzBuzz") 
+  }
+    
+  it should "return 'Fizz' from a multiple of three only" in { 
+      FizzBuzz(12) should be ("Fizz") 
+  }
+    
+  it should "return 'Buzz' from a multiple of five only" in { 
+      FizzBuzz(10) should be ("Buzz") 
+  }
+    
+  it should "return the stringified input from a non multiple of three or five" in { 
+      FizzBuzz(11) should be ("11") 
+  }
+ 
+}
+```					</script>
+				</section>
 
-				<section data-markdown="slides/scalacheck.md" 
-						 data-separator="^\n\n\n"  
-				         data-vertical="^\n\n"  
-				         data-notes="^Note:"  
-				         data-charset="utf-8"></section>
+				<section data-markdown>
+					<script type="text/template">
+## Specs2
 
-				<section data-markdown="slides/scalacheck-sample.md" 
-						 data-separator="^\n\n\n"  
-				         data-vertical="^\n\n"  
-				         data-notes="^Note:"  
-				         data-charset="utf-8"></section>
+- Authored by *Eric Torreborre*
+- Focused on `BDD`
+- 2 categories of test:
+  - Unit specification ~ Unit test
+  - Acceptance specification ~ like cucumber acceptance testing
+- Larger selection of matchers for assertion
+- All tests run asynchronously using `Promise`s
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+## Specs2
+
+```scala
+@RunWith(classOf[JUnitRunner])
+class FizzBuzzJUnitSpec extends org.specs2.mutable.Specification {
+    
+  "Multiples of both three and five" should {
+    "print 'FizzBuzz'" in { FizzBuzz(15) must_== "FizzBuzz" }
+  }
+  "Multiples of three only" should {
+    "print 'Fizz'" in { FizzBuzz(12) must_== "Fizz" }
+  }
+  "Multiples of five only" should {
+    "print 'Buzz'" in { FizzBuzz(10) must_== "Buzz" }
+  }
+  "Non multiples of five or three" should {
+    "print the number back" in { FizzBuzz(11) must_== "11" }
+  }
+}
+```
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+## Scalacheck
+
+- Property-based testing, inspired by Haskell's `QuickCheck`
+- Well supported by both `Scalatest` and `Specs2`
+- Different style of testing, best illustrated by an example
+- Less of a general tool, excellent for some use cases
+	- Enforces rules, properties, invariants, conditions
+	- Do not have to write test data, great for edge cases
+- Sometimes difficult to express constraints as properties
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+## Scalacheck
+
+```scala
+class FizzBuzzSpec extends PropSpec with PropertyChecks with Matchers {
+  
+  val ints = Gen.choose(Integer.MIN_VALUE,Integer.MAX_VALUE)
+  
+  property("A FizzBuzz processor should play fizzbuzz correctly") {
+   forAll(ints) { (n: Int) =>
+    if(n % 15 == 0) FizzBuzz(n) should be("FizzBuzz") 
+    else if(n % 3 ==0) FizzBuzz(n) should be("Fizz")
+    else if(n % 5 ==0) FizzBuzz(n) should be("Buzz")
+    else "" + n == FizzBuzz(n) 
+   }
+  }
+  
+}
+```					</script>
+				</section>
 
 				</section>
 
@@ -77,131 +170,387 @@
 			<section id="scalatest">
 				<section><h2>Focus on Scalatest</h2></section>
 
-			<section data-markdown="slides/scalatest-1.md" 
-					 data-separator="^\n\n\n"  
-			         data-vertical="^\n\n"  
-			         data-notes="^Note:"  
-			         data-charset="utf-8"></section>
+			<section data-markdown>
+				<script type="text/template">
+## Scalatest - Styles
 
-			<section data-markdown="slides/scalatest-2.md" 
-					 data-separator="^\n\n\n"  
-			         data-vertical="^\n\n"  
-			         data-notes="^Note:"  
-			         data-charset="utf-8"></section>
+[Selecting a style](http://scalatest.org/user_guide/selecting_a_style)
 
-			<section data-markdown="slides/scalatest-3.md" 
-					 data-separator="^\n\n\n"  
-			         data-vertical="^\n\n"  
-			         data-notes="^Note:"  
-			         data-charset="utf-8"></section>
+- `FunSuite`: closest to JUnit; not very BDD
+- `FlatSpec`: transition from JUnit to BDD, enforces BDD style
+- `FunSpec`: closer to Ruby's `RSpec`
+- `WordSpec`: similarities to `Specs2` specifications
+- `FreeSpec`: "build your own BDD style" approach
+- `Spec`: less compilation leads to faster build-test cycles; needs a significant number of tests to impact
+- `PropSpec`: Property test style - think `ScalaCheck`
+- `FeatureSpec`: Acceptance test style, similarities to Cucumber
+				</script>
+			</section>
 
-			<section data-markdown="slides/scalatest-4.md" 
-					 data-separator="^\n\n\n"  
-			         data-vertical="^\n\n"  
-			         data-notes="^Note:"  
-			         data-charset="utf-8"></section>
+			<section data-markdown>
+				<script type="text/template">
+## Scalatest - JUnit integration
 
-			<section data-markdown="slides/scalatest-5.md" 
-					 data-separator="^\n\n\n"  
-			         data-vertical="^\n\n"  
-			         data-notes="^Note:"  
-			         data-charset="utf-8"></section>
+- `JUnitRunner` allows JUnit to run tests, supports running in all IDEs
+- Add following to `build.sbt` to generate test reports understood by Bamboo, Jenkins, etc.
+```scala
+testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-u", "target/test-reports")
+```
+				</script>
+			</section>
+
+			<section data-markdown>
+				<script type="text/template">
+## Scalatest - Assertion via Matchers Trait
+
+```scala
+val result = ...
+// Equality
+result should be ("foo")
+// Collection, String, etc length
+result should have length 3
+// Greater than, less then, etc.
+result.length should be < 4
+result.length should be > 2
+// Fuzzy range
+result.length should be (3 +- 1)
+// Collection contains
+List(1,2,3) should contain (3)
+// Ands and ors
+List(1,2,3) should (contain (2) and have length (3))
+// Arbitrary property testing with symbols e.g. 'sym and properties
+book should have (
+  'title ("Programming in Scala"),
+  'author (List("Odersky", "Spoon", "Venners")),
+  'pubYear (2008)
+  'ISBN ("123-456-7890")
+)
+// Intercepting exceptions
+intercept[IndexOutOfBoundsException] {
+  "foo".charAt(-1)
+}
+```
+				</script>
+			</section>
+
+			<section data-markdown>
+				<script type="text/template">
+## Scalatest - Simple Composable Fixture
+
+```scala
+class TestSpec extends FlatSpec with Matchers with MockitoSugar {
+	trait BaseSetup {
+      val mockFoo = mock[FooService]
+      val underTest = new BarService(mockFoo)
+    }
+
+    trait MockSetup { self: BaseSetup =>
+      val myValue = 42
+      when(mockFoo.answerTheQuestionOfLife()).thenReturn(myValue)
+	}
+
+    "A foo" should "know the answer to life" in new BaseSetup with MockSetup {
+	  underTest.ask() should be (42)
+    }
+}
+```
+				</script>
+			</section>
+
+			<section data-markdown>
+				<script type="text/template">
+## Scalatest - Loan Fixture
+
+```scala
+class TestSpec extends FlatSpec {
+	def withStore(testCode: Store => Any) {
+      val resource = Store.connect()
+      try {
+		testCode(resource)
+      } finally {
+        resource.dispose()
+      }
+    }
+
+    "A loaned object" should "be returned" in withStore { store =>
+       val result = store.doSomethingAnything()
+       result should be (42)
+    }
+}
+```
+				</script>
+			</section>
 
 			</section>
 
 			<section>
 				<section><h2>Mocking, stubbing, and spies (oh my!)</h2></section>
 
-				<section data-markdown="slides/mocking-1.md" 
-						 data-separator="^\n\n\n"  
-				         data-vertical="^\n\n"  
-				         data-notes="^Note:"  
-				         data-charset="utf-8"></section>
+				<section data-markdown>
+					<script type="text/template">
+## Mocking vs Stubbing vs Spies
 
-				<section data-markdown="slides/mocking-2.md" 
-						 data-separator="^\n\n\n"  
-				         data-vertical="^\n\n"  
-				         data-notes="^Note:"  
-				         data-charset="utf-8"></section>
+**Fakes** actually have working implementations, but usually take some shortcut which makes them not suitable for production
 
-				<section data-markdown="slides/mocking-3.md" 
-						 data-separator="^\n\n\n"  
-				         data-vertical="^\n\n"  
-				         data-notes="^Note:"  
-				         data-charset="utf-8"></section>
+**Mocks** are pre-programmed with expectations which form a specification of the calls they are expected to receive
+
+**Stubs** provide canned answers to calls made during the test, usually not responding at all to anything outside of what is programmed into the test
+
+**Spies** record calls made for later verification.  Provides canned answers during test similar to a stub								</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+## Mocking with Mockito
+
+- Easy transition from using Mockito in Java
+- Make sure to rename `eq` matcher due to clash with `Predef`:
+
+```scala
+import org.mockito.Matchers.{eq => eql}
+```
+
+```scala
+class MockedSpec extends FlatSpec with MockitoSugar {
+	trait Fixture {
+      val foo = mock[FooService]
+      when(foo.doSomethingStubbed()).thenReturn("STUB") // Stubbing
+      when(foo.doSomething(eql("FOO"))).thenReturn("BAR")
+      val bar = new BarService(foo)
+    }
+
+    "A bar service" should "collaborate with foo" in new Fixture {
+      bar.doSomething() should be ("done")
+      verify(foo).doSomething(eql("FOO")) // Mocking
+    }
+}
+```					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+## Faking with Traits
+
+- Can selectively override functionality of a real object
+
+```scala
+class RealConnection {
+    def cleanUp() {}
+
+	def somethingSlowOrExpensive(): String = 
+	  "slow AND expensive"
+
+	def methodUnderTest(): String =
+	  try {
+	    somethingSlowOrExpensive()
+	  } finally {
+	  	cleanUp()
+	  }
+}
+
+class FakeySpec extends FlatSpec with Matchers {
+	trait FakeOp { self: RealConnection =>
+	  override def somethingSlowOrExpensive(): String =
+		"fake"
+	}
+
+	"A connection" should "not be slow and expensive" in {
+		val cxn = new RealConnection with FakeOp
+		cxn.methodUnderTest() should be ("fake")
+	}
+}
+```					</script>
+				</section>
 			</section>
 
 			<section>
 				<section><h2>Akka TestKit</h2></section>
 
-				<section data-markdown="slides/testkit-1.md" 
-						 data-separator="^\n\n\n"  
-				         data-vertical="^\n\n"  
-				         data-notes="^Note:"  
-				         data-charset="utf-8"></section>
+				<section data-markdown>
+					<script type="text/template">
+## Testkit - Base trait
 
-				<section data-markdown="slides/testkit-2.md" 
-						 data-separator="^\n\n\n"  
-				         data-vertical="^\n\n"  
-				         data-notes="^Note:"  
-				         data-charset="utf-8"></section>
+- The scalatest design philosophy is many small mixin traits that each do one thing well
+- Base trait/abstract class with mixins for consistency
+
+```scala
+abstract class BaseActorSpec extends TestKit(ActorSystem("unit-test")) 
+	with FlatSpecLike 
+	with Matchers 
+	with MockitoSugar 
+	with BeforeAndAfterAll 
+	with ImplicitSender {
+  
+  override def afterAll = 
+    TestKit.shutdownActorSystem(system)
+
+}
+```
+
+```scala
+class RealActorSpec extends BaseActorSpec {
+	// Much simpler, consistent behaviors
+}
+```
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+## Testkit - Design for testing with injection
+
+- Parent-child interactions are important to test
+  - Need to validate supervision behavior
+  - Anything interesting in the protocol: Push/Pull, Timeouts, Retries, Error Handling
+- `TestProbe` can stub out the other side of the interaction **if** the actor is designed for testing
+
+Don't do:
+
+```scala
+class FooActor extends Actor {
+	val child = context.actorOf(Props[BarActor]) // How to test this?
+}
+```
+
+Consider using a higher-order function:
+
+```scala
+class FooActor(factory: ActorRefFactory => ActorRef) extends Actor {
+	val child = factory(context)
+}
+
+// Production Code
+val foo = system.actorOf(Props(new FooActor(_.actorOf(Props(new BarActor)))))
+
+// Test Code
+val probe = TestProbe()
+val foo = TestActorRef(Props(new FooActor(_ => probe.ref)))
+```
+					</script>
+				</section>
 			</section>
 
-			<section data-markdown="slides/unit-testing.md" 
-					 data-separator="^\n\n\n"  
-			         data-vertical="^\n\n"  
-			         data-notes="^Note:"  
-			         data-charset="utf-8"></section>
+			<section data-markdown>
+				<script type="text/template">
+## Unit testing & `TestActorRef`
+
+- Focuses on interactions between actor and outside
+- `TestActorRef` allows interaction with internal actor if needed
+- Get this set of tests passing first
+				</script>
+			</section>
 
 			<section>
 				<section><h2>Integration Testing</h2></section>
 
-				<section data-markdown="slides/integration-testing-1.md" 
-						 data-separator="^\n\n\n"  
-				         data-vertical="^\n\n"  
-				         data-notes="^Note:"  
-				         data-charset="utf-8"></section>
+				<section data-markdown>
+					<script type="text/template">
+## Integration testing & `TestProbe`
 
-				<section data-markdown="slides/integration-testing-2.md" 
-						 data-separator="^\n\n\n"  
-				         data-vertical="^\n\n"  
-				         data-notes="^Note:"  
-				         data-charset="utf-8"></section>
+- Use system.actorOf to start actor subsystem, test as blocks
+- Use `TestProbe` at boundaries to confirm behavior and assert interactions
+- Use `ImplicitSender` to assert interactions with the entrypoint actors
+- False negatives (test failures) can arise with `expectMsg` timeouts and slow-running environments
+  - Can be an iterative process
+  - Can use the `.dilated` implicit on `Duration`; Scaled by configuration item `akka.test.timefactor`
+- Take care with using `CallingThreadDispatcher` and `TestProbe`, deadlocks are a possibility
+- Logging can be used to help understand the behavior in case you're stumped
+
+```
+akka {
+  loglevel = "DEBUG"
+  actor {
+    debug {
+      receive = on
+      autoreceive = on
+      lifecycle = on
+    }
+  }
+}
+```
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+## Integration testing & named actors
+
+- When using named actors that are slow to stop, duplicate actor names exceptions can arise
+- Can get around with a `TestProbe` deathwatch and `expectTerminated`
+- This can make tests run longer than anonymous actors
+  - Downside of anonymous actors is the logging is more difficult to grok
+
+```scala
+  val dwProbe = TestProbe()
+  val underTest = system.actorOf(Props(new FooActor,"an-actor-named-foo")
+  dwProbe watch underTest
+  try {
+    testCode(underTest,component)
+  } finally {
+    underTest ! PoisonPill
+    dwProbe expectTerminated(underTest, 10.seconds)
+  }
+```
+					</script>
+				</section>
 
 			</section>
 
-			<section data-markdown="slides/multijvm-testing.md" 
-					 data-separator="^\n\n\n"  
-			         data-vertical="^\n\n"  
-			         data-notes="^Note:"  
- 	 		         data-charset="utf-8"></section>
+			<section data-markdown>
+				<script type="text/template">
+## Multi-JVM Testing
+
+- Provides ability to coordinate actions across several nodes using `TestConductor`
+- `MultiNodeConfig` is used to configure nodes and roles
+- Spec must extend `MultiNodeSpec`
+- `enterBarrier` method provides synchronization across nodes
+- Supports simulation of failure conditions `blackhole`, `throttle`, `passThrough`
+- Nodes can be killed during testing to simulate crashes
+- `SbtMultiJvm` plugin is used to run multiple jvms on one or more machines
+				</script>
+			</section>
 
  	 		<section>
  	 			<section><h2>Deep Dive</h2></section>
 
- 	 			<section data-markdown="slides/deep-dive-1.md" 
-					 data-separator="^\n\n\n"  
-			         data-vertical="^\n\n"  
-			         data-notes="^Note:"  
-			         data-charset="utf-8"></section>
+ 	 			<section data-markdown>
+ 	 				<script type="text/template">
+## Deep Dive - System Under Test
 
- 	 			<section data-markdown="slides/deep-dive-2.md" 
-					 data-separator="^\n\n\n"  
-			         data-vertical="^\n\n"  
-			         data-notes="^Note:"  
-			         data-charset="utf-8"></section>
+- The core system is a pair of actors, parent and child
+  - Parent acts as supervisor to children
+  - When new work comes in, a new child is created to perform it
+  - Child "does work" by invoking a service call asynchronously
+  - Successes & Failures from Child are relayed to Parent and on to client
+  - Parent tracks work and performs a timeout/retry cycle
+- For multi-jvm a frontend actor "Service Actor" is added in front of parent actor
+  - Cluster logic separated from service actor for unit testing
+ 	 				</script>
+ 	 			</section>
 
- 	 			<section data-markdown="slides/deep-dive-3.md" 
-					 data-separator="^\n\n\n"  
-			         data-vertical="^\n\n"  
-			         data-notes="^Note:"  
-			         data-charset="utf-8"></section>
+ 	 			<section data-markdown>
+ 	 				<script type="text/template">
+## Deep Dive - Unit Testing Demo
 
- 	 			<section data-markdown="slides/deep-dive-4.md" 
-					 data-separator="^\n\n\n"  
-			         data-vertical="^\n\n"  
-			         data-notes="^Note:"  
-			         data-charset="utf-8"></section>
+- ParentUnitSpec, ChildUnitSpec, ServiceUnitSpec
+ 	 				</script>
+ 	 			</section>
+
+ 	 			<section data-markdown>
+ 	 				<script type="text/template">
+## Deep Dive - Integration testing (Parent-Child) Demo
+
+- ParentChildIntegrationSpec
+ 	 				</script>
+ 	 			</section>
+
+ 	 			<section data-markdown>
+ 	 				<script type="text/template">
+## Deep Dive - Multi-JVM Demo
+
+- MultiNodeSlideSpec
+ 	 				</script>
+ 	 			</section>
 
  	 		</section>
 
@@ -209,11 +558,33 @@
  	 			<h2>Q &amp; A!</h2>
  	 		</section>
 
-			<section data-markdown="slides/references.md" 
-					 data-separator="^\n\n\n"  
-			         data-vertical="^\n\n"  
-			         data-notes="^Note:"  
-			         data-charset="utf-8"></section>
+			<section data-markdown>
+				<script type="text/template">
+## References
+
+Scala testing
+
+- [ScaTDD: Casting an eye over three major Test frameworks in Scala](http://scalabound.org/?p=445)
+- [Which Scala testing tools should you use?](http://tech.gilt.com/post/62430610230/which-scala-testing-tools-should-you-use)
+- [ScalaTest docs - selecting a style](http://scalatest.org/user_guide/selecting_a_style)
+- [ScalaTest vs. Specs2](http://blog.appfusions.com/scalatest-vs-specs2/)
+- [ScalaCheck docs](https://github.com/rickynils/scalacheck/wiki/User-Guide)
+- [ScalaCheck examples - source @ github](https://github.com/oscarrenalias/scalacheck-examples/blob/master/scalacheck-integration-scalatest/src/test/scala/SimpleSpec.scala)
+- [Mocks are not Stubs](http://martinfowler.com/articles/mocksArentStubs.html)
+- [... wherein Traits become the new mock objects](http://tommorris.org/posts/2825)
+- [Scala Testing](https://www.youtube.com/watch?v=W9yMkao_AZg)
+
+Akka Testing
+
+- [Injecting test probe for child actors](http://www.superloopy.io/articles/2013/injecting-akka-testprobe.html)
+- [Unit testing akka actors with testkit](http://roestenburg.agilesquad.com/2011/02/unit-testing-akka-actors-with-testkit_12.html)
+- [Akka docs - multi-node-testing](http://doc.akka.io/docs/akka/2.3.3/dev/multi-node-testing.html)
+
+Background Image
+
+- [The Sarek massif seen from Mt. Akkha](https://flic.kr/p/5bwav9)
+				</script>
+			</section>
 
 
 		</div>

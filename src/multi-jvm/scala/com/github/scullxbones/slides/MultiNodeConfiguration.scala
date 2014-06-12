@@ -20,8 +20,6 @@ object MultiNodeConfiguration extends MultiNodeConfig {
   val backend1 = role("backend1")
   val backend2 = role("backend2")
 
-//  testTransport(on = true)
-
   commonConfig(ConfigFactory.parseString(
     """
     |akka.actor.provider = "akka.cluster.ClusterActorRefProvider"
