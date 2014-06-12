@@ -434,9 +434,12 @@ val foo = TestActorRef(Props(new FooActor(_ => probe.ref)))
 				<script type="text/template">
 ## Unit testing & `TestActorRef`
 
-- Focuses on interactions between actor and outside
-- `TestActorRef` allows interaction with internal actor if needed
-- Get this set of tests passing first
+- Focuses on interactions between single actor and its surroundings
+- `TestActorRef` allows interaction with internal actor if needed via `.underlyingActor`
+- Get this set of tests passing first; will simplify integration testing
+- Can use `TestProbe` to interact, for example simulating a Supervisor or Supervisee
+- Take care with using `CallingThreadDispatcher` and `TestProbe`, deadlocks are a possibility
+  - `TestProbe` ~> actor running in the `CallingThreadDispatcher` ~> `TestProbe` ... deadlock is likely
 				</script>
 			</section>
 
@@ -447,13 +450,12 @@ val foo = TestActorRef(Props(new FooActor(_ => probe.ref)))
 					<script type="text/template">
 ## Integration testing & `TestProbe`
 
-- Use system.actorOf to start actor subsystem, test as blocks
+- Use system.actorOf to start actor subsystem, test as integrated subsystems, including supervision behaviors
 - Use `TestProbe` at boundaries to confirm behavior and assert interactions
 - Use `ImplicitSender` to assert interactions with the entrypoint actors
 - False negatives (test failures) can arise with `expectMsg` timeouts and slow-running environments
   - Can be an iterative process
   - Can use the `.dilated` implicit on `Duration`; Scaled by configuration item `akka.test.timefactor`
-- Take care with using `CallingThreadDispatcher` and `TestProbe`, deadlocks are a possibility
 - Logging can be used to help understand the behavior in case you're stumped
 
 ```
@@ -475,7 +477,7 @@ akka {
 					<script type="text/template">
 ## Integration testing & named actors
 
-- When using named actors that are slow to stop, duplicate actor names exceptions can arise
+- When using named actors that are slow to stop, duplicate actor name exceptions can arise
 - Can get around with a `TestProbe` deathwatch and `expectTerminated`
 - This can make tests run longer than anonymous actors
   - Downside of anonymous actors is the logging is more difficult to grok
@@ -496,19 +498,53 @@ akka {
 
 			</section>
 
+			<section>
+				<section><h2>Multi-JVM(Node) Testing</h2></section>
+
 			<section data-markdown>
 				<script type="text/template">
 ## Multi-JVM Testing
 
-- Provides ability to coordinate actions across several nodes using `TestConductor`
+- Provides ability to coordinate actions across several jvms/nodes using `TestConductor`
+- Same test can run Multi-JVM (same machine) or Multi-Node (different machines)
 - `MultiNodeConfig` is used to configure nodes and roles
 - Spec must extend `MultiNodeSpec`
 - `enterBarrier` method provides synchronization across nodes
-- Supports simulation of failure conditions `blackhole`, `throttle`, `passThrough`
+- Supports simulation of network conditions `blackhole`, `throttle`. To remove network issues, use `passThrough`
 - Nodes can be killed during testing to simulate crashes
 - `SbtMultiJvm` plugin is used to run multiple jvms on one or more machines
 				</script>
 			</section>
+
+			<section data-markdown>
+				<script type="text/template">
+## Multi-JVM Testing conventions
+
+- Tests should be located in src/multi-jvm directory (can be overridden)
+- A specification should be abstract and extended by a one concrete class for every node
+- A class should be created which extends `MultiNodeConfig`
+  - Defines node role names
+  - Defines shared configuration, per-role configuration
+- Node failure tends to be noisy, `muteDeadLetters` can be useful to limit logging
+				</script>
+			</section>
+
+			<section data-markdown>
+				<script type="text/template">
+## Multi-JVM Testing tips &amp; tricks
+
+[Things to keep in mind](http://doc.akka.io/docs/akka/snapshot/dev/multi-node-testing.html#Things_to_Keep_in_Mind)
+
+- Use `runOn(<node name>)` to execute a block on a particular node
+  - Expect these to run in a separate thread - they *do not* block
+  - Use `enterBarrier` to create a sync point across multiple `runOn` blocks
+- Anything run outside of a `runOn` block runs on `TestConductor` node
+- When using `TestConductor.exit(<role>,<exit code>)` to stop nodes, non-zero exit codes will cause a test failure
+- Liberal use of `expectMsg`, `expectTerminated`, etc with timeouts for synchronization of behavior
+				</script>
+			</section>
+
+		</section>
 
  	 		<section>
  	 			<section><h2>Deep Dive</h2></section>
@@ -582,7 +618,7 @@ Akka Testing
 
 Background Image
 
-- [The Sarek massif seen from Mt. Akkha](https://flic.kr/p/5bwav9)
+- [The Sarek massif seen from Mt. Áhkká](https://flic.kr/p/5bwav9)
 				</script>
 			</section>
 
