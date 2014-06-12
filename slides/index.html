@@ -538,7 +538,7 @@ akka {
 - Use `runOn(<node name>)` to execute a block on a particular node
   - Expect these to run in a separate thread - they *do not* block
   - Use `enterBarrier` to create a sync point across multiple `runOn` blocks
-- Anything run outside of a `runOn` block runs on `TestConductor` node
+- Anything run outside of a `runOn` block runs on all nodes
 - When using `TestConductor.exit(<role>,<exit code>)` to stop nodes, non-zero exit codes will cause a test failure
 - Liberal use of `expectMsg`, `expectTerminated`, etc with timeouts for synchronization of behavior
 				</script>

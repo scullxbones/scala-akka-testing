@@ -162,6 +162,8 @@ abstract class MultiNodeSlidesSpec
       termProbe expectTerminated service1
 
       enterBarrier("all-down")
+      enterBarrier("back-up")
+      system.actorOf(Props[ServiceActor], "service")
     }
 
     runOn(backend1) {
@@ -176,11 +178,6 @@ abstract class MultiNodeSlidesSpec
       enterBarrier("back-up")
     }
 
-    runOn(frontend) {
-      enterBarrier("back-up")
-      system.actorOf(Props[ServiceActor], "service")
-    }
-
     enterBarrier("after-3rd")
 
   }
@@ -190,8 +187,6 @@ abstract class MultiNodeSlidesSpec
       testConductor.exit(backend1,0).await
       testConductor.exit(backend2,0).await
     }
-
-    enterBarrier("no backends")
 
     runOn(frontend) {
       infoMemberStates()
